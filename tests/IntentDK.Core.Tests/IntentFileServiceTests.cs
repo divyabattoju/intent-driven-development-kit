@@ -1,3 +1,5 @@
+using IntentDK.Core;
+using IntentDK.Core.Models;
 using IntentDK.Core.Services;
 using IntentDK.Core.Templates;
 
@@ -226,5 +228,86 @@ scope:
         var intentInfo = intents.First();
         Assert.True(intentInfo.HasPlan);
         Assert.False(intentInfo.HasTasks);
+    }
+
+    [Fact]
+    public void ReadTasks_ValidFile_ReturnsTaskBreakdown()
+    {
+        // Arrange - minimal valid tasks YAML (snake_case from serializer)
+        var intentPath = _service.CreateIntentFile(_testDirectory, "test");
+        var tasksContent = @"intent_id: intent-123
+goal: Test goal
+tasks:
+  - id: T1
+    title: First task
+    type: Implement
+    status: Pending
+    target: Service.cs
+    description: Do something
+    acceptance_criteria: []
+    depends_on: []
+    complexity: 2
+progress:
+  completed: 0
+  in_progress: 0
+  pending: 1
+  blocked: 0
+  total: 1
+  percentage: 0";
+        _service.CreateTasksFile(intentPath, tasksContent);
+
+        // Act
+        var result = _service.ReadTasks(intentPath);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
+        Assert.Equal("Test goal", result.Value!.Goal);
+        Assert.Single(result.Value.Tasks);
+        Assert.Equal("T1", result.Value.Tasks[0].Id);
+        Assert.Equal("First task", result.Value.Tasks[0].Title);
+        Assert.Equal(TaskType.Implement, result.Value.Tasks[0].Type);
+        Assert.Equal("Service.cs", result.Value.Tasks[0].Target);
+    }
+
+    [Fact]
+    public void ReadTasks_NonExistentFile_ReturnsFailure()
+    {
+        // Arrange
+        var intentPath = _service.CreateIntentFile(_testDirectory, "test");
+
+        // Act - no tasks file created
+        var result = _service.ReadTasks(intentPath);
+
+        // Assert
+        Assert.False(result.IsSuccess);
+        Assert.Contains(result.Errors, e => e.Contains("not found"));
+    }
+
+    [Fact]
+    public void CreateTasksFile_ThenReadTasksFile_RoundTrips()
+    {
+        // Arrange - intent file path and a valid intent (processor needs valid scope)
+        var intentPath = _service.CreateIntentFile(_testDirectory, "roundtrip");
+        var intent = new Intent
+        {
+            Goal = "Add roundtrip test",
+            Scope = new List<string> { "Service.cs" },
+            Constraints = new List<string>(),
+            Verification = new List<string>()
+        };
+        var processor = new IntentProcessor();
+
+        // Act - write tasks YAML via processor, then read back
+        var tasksPath = processor.CreateTasksFile(intentPath, intent);
+        var readResult = processor.ReadTasksFile(intentPath);
+
+        // Assert
+        Assert.True(File.Exists(tasksPath));
+        Assert.True(readResult.IsSuccess);
+        Assert.NotNull(readResult.Value);
+        Assert.Equal(intent.Goal, readResult.Value!.Goal);
+        Assert.Equal(intent.Id, readResult.Value.IntentId);
+        Assert.NotEmpty(readResult.Value.Tasks);
     }
 }

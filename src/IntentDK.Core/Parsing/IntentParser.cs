@@ -165,6 +165,46 @@ public class IntentParser
         return _serializer.Serialize(plan);
     }
 
+    /// <summary>
+    /// Parses a TaskBreakdown from YAML.
+    /// </summary>
+    public TaskBreakdown ParseTaskBreakdown(string yaml)
+    {
+        if (string.IsNullOrWhiteSpace(yaml))
+        {
+            throw new IntentParseException("YAML content cannot be empty.");
+        }
+
+        try
+        {
+            var breakdown = _deserializer.Deserialize<TaskBreakdown>(yaml);
+
+            if (breakdown == null)
+            {
+                throw new IntentParseException("Failed to parse YAML into TaskBreakdown.");
+            }
+
+            return breakdown;
+        }
+        catch (YamlDotNet.Core.YamlException ex)
+        {
+            throw new IntentParseException($"Invalid YAML format: {ex.Message}", ex);
+        }
+    }
+
+    /// <summary>
+    /// Serializes a TaskBreakdown to YAML.
+    /// </summary>
+    public string ToYaml(TaskBreakdown breakdown)
+    {
+        if (breakdown == null)
+        {
+            throw new ArgumentNullException(nameof(breakdown));
+        }
+
+        return _serializer.Serialize(breakdown);
+    }
+
     private static string? ExtractYamlFromCodeFence(string text)
     {
         // Match ```yaml ... ``` or ``` ... ```

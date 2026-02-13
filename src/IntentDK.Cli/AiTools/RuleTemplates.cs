@@ -81,7 +81,33 @@ verification:
 
 Read the most recent intent file and generate a structured implementation plan.
 
-**Response Format:**
+**Actions:**
+1. Read the latest `.intent/*.intent.yaml` file.
+2. Generate the plan and **write it to the associated plan file** `.intent/<same-base>.plan.yaml` in YAML format so the user can edit and rejig the plan.
+3. Show the plan in chat (markdown) as well.
+
+**Plan YAML format** (write this to `.plan.yaml`; the user can edit steps, order, and targets):
+```yaml
+id: <short-id>
+intent_id: <from intent>
+summary: <one-line summary>
+steps:
+  - step: 1
+    action: Review   # or Modify, Create, Delete, Test, Configure, Document
+    target: <file or component>
+    description: <what this step does>
+    details: <optional details>
+    expected_outcome: <optional>
+  - step: 2
+    action: Modify
+    target: <target>
+    description: <description>
+affected_files: [<list of paths>]
+risks: [<optional risks>]
+dependencies: [<optional dependencies>]
+```
+
+**Chat response (markdown):**
 ```markdown
 ## Implementation Plan
 
@@ -99,13 +125,45 @@ Read the most recent intent file and generate a structured implementation plan.
 
 ### Verification Checklist
 - [ ] [criterion]
+
+Plan saved to `.intent/<base>.plan.yaml` — edit that file to rejig the plan, then use `/intent.tasks` or `/intent.implement`.
 ```
 
 ## `/intent.tasks` - Break Down Tasks
 
-Generate detailed task breakdown with dependencies and acceptance criteria.
+Generate detailed task breakdown with dependencies and acceptance criteria. **If a `.plan.yaml` file exists for the intent**, use its steps as the basis for the task breakdown so the user's plan edits are respected.
 
-**Response Format:**
+**Actions:**
+1. Read the latest `.intent/*.intent.yaml` (and optionally `.intent/*.plan.yaml` if present).
+2. Generate the task breakdown and **write it to the associated tasks file** `.intent/<same-base>.tasks.yaml` in YAML format so the user can edit and rejig tasks.
+3. Show the breakdown in chat (markdown) as well.
+
+**Tasks YAML format** (write this to `.tasks.yaml`; the user can edit order, add/remove tasks, change criteria):
+```yaml
+intent_id: <from intent>
+goal: <one-line goal>
+tasks:
+  - id: T1
+    title: <short title>
+    type: Implement   # or Analyze, Create, Test, Review, Document, Configure, Verify
+    status: Pending   # or InProgress, Completed, Blocked, Skipped
+    target: <file or component>
+    description: <what to do>
+    acceptance_criteria:
+      - <criterion>
+    depends_on: []    # list of task IDs if any
+    complexity: 3     # 1-5
+  - id: T2
+    ...
+progress:
+  completed: 0
+  in_progress: 0
+  pending: 2
+  total: 2
+  percentage: 0
+```
+
+**Chat response (markdown):**
 ```markdown
 ## Task Breakdown
 
@@ -118,11 +176,13 @@ Generate detailed task breakdown with dependencies and acceptance criteria.
 #### T1: [Title]
 **Acceptance Criteria:**
 - [ ] [criterion]
+
+Tasks saved to `.intent/<base>.tasks.yaml` — edit that file to rejig tasks, then use `/intent.implement`.
 ```
 
 ## `/intent.implement` - Implement
 
-Implement tasks one by one, showing progress:
+Implement tasks one by one, showing progress. **If a `.plan.yaml` file exists**, follow its steps in order. **If a `.tasks.yaml` file exists**, use its tasks (in order and by dependency) as the list to implement so the user's edits (reorder, add, remove, change criteria) are respected.
 
 ```markdown
 ## Implementing Task T1: [Title]
@@ -346,18 +406,11 @@ Read intent and output:
 
 ## /intent.tasks - Task Breakdown
 
-Generate tasks with:
-- ID, type, title
-- Dependencies
-- Acceptance criteria
+Generate tasks with ID, type, title, dependencies, acceptance criteria. Write the breakdown to `.intent/<same-base>.tasks.yaml` so the user can rejig tasks.
 
 ## /intent.implement - Execute
 
-For each task:
-1. Show task being implemented
-2. Make changes
-3. Mark complete
-4. Proceed to next
+For each task: show task, make changes, mark complete, next. If `.tasks.yaml` exists, use its tasks (order and dependency) as the list to implement.
 
 ## /intent.verify - Verify
 
@@ -455,17 +508,10 @@ Generate an implementation plan from the intent file with:
 - Verification checklist
 
 ### /intent.tasks
-Break down the intent into detailed tasks with:
-- Task ID, type, and title
-- Dependencies between tasks
-- Acceptance criteria
+Break down the intent into detailed tasks (ID, type, title, dependencies, acceptance criteria). Write to `.intent/<same-base>.tasks.yaml` so the user can rejig tasks.
 
 ### /intent.implement
-Implement tasks one by one:
-1. Show current task
-2. Make changes
-3. Mark complete
-4. Move to next
+Implement tasks one by one. If `.tasks.yaml` exists, use its tasks as the list to implement; otherwise follow the plan or intent.
 
 ### /intent.verify
 Verify implementation against criteria:

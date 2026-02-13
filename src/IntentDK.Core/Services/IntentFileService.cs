@@ -163,6 +163,56 @@ public class IntentFileService
     }
 
     /// <summary>
+    /// Reads and parses a plan from the file associated with an intent file.
+    /// </summary>
+    /// <param name="intentFilePath">Path to the intent file (e.g. .intent/intent-20260213.intent.yaml).</param>
+    /// <returns>Success with the Plan, or failure if the file is missing or invalid.</returns>
+    public ParseResult<Plan> ReadPlan(string intentFilePath)
+    {
+        var planPath = GetAssociatedFilePath(intentFilePath, PlanFileExtension);
+        if (!File.Exists(planPath))
+        {
+            return ParseResult<Plan>.Failure(new List<string> { $"Plan file not found: {planPath}" });
+        }
+
+        try
+        {
+            var yaml = File.ReadAllText(planPath);
+            var plan = _parser.ParsePlan(yaml);
+            return ParseResult<Plan>.Success(plan);
+        }
+        catch (IntentParseException ex)
+        {
+            return ParseResult<Plan>.Failure(new List<string> { ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Reads and parses a tasks file associated with an intent file.
+    /// </summary>
+    /// <param name="intentFilePath">Path to the intent file (e.g. .intent/intent-20260213.intent.yaml).</param>
+    /// <returns>Success with the TaskBreakdown, or failure if the file is missing or invalid.</returns>
+    public ParseResult<TaskBreakdown> ReadTasks(string intentFilePath)
+    {
+        var tasksPath = GetAssociatedFilePath(intentFilePath, TasksFileExtension);
+        if (!File.Exists(tasksPath))
+        {
+            return ParseResult<TaskBreakdown>.Failure(new List<string> { $"Tasks file not found: {tasksPath}" });
+        }
+
+        try
+        {
+            var yaml = File.ReadAllText(tasksPath);
+            var breakdown = _parser.ParseTaskBreakdown(yaml);
+            return ParseResult<TaskBreakdown>.Success(breakdown);
+        }
+        catch (IntentParseException ex)
+        {
+            return ParseResult<TaskBreakdown>.Failure(new List<string> { ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Creates a tasks file for an intent.
     /// </summary>
     public string CreateTasksFile(string intentFilePath, string tasksContent)

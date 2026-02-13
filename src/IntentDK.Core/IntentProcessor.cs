@@ -117,6 +117,14 @@ public class IntentProcessor
         return _parser.ToYaml(plan);
     }
 
+    /// <summary>
+    /// Serializes a task breakdown to YAML.
+    /// </summary>
+    public string ToYaml(TaskBreakdown breakdown)
+    {
+        return _parser.ToYaml(breakdown);
+    }
+
     #region Task Generation
 
     /// <summary>
@@ -209,21 +217,41 @@ public class IntentProcessor
     }
 
     /// <summary>
-    /// Creates a plan file for an intent.
+    /// Creates a plan file for an intent (YAML format so the user can edit and re-run).
     /// </summary>
     public string CreatePlanFile(string intentFilePath, Intent intent)
     {
-        var planContent = CreatePlanMarkdown(intent);
-        return _fileService.CreatePlanFile(intentFilePath, planContent);
+        var plan = CreatePlan(intent);
+        var planYaml = ToYaml(plan);
+        return _fileService.CreatePlanFile(intentFilePath, planYaml);
     }
 
     /// <summary>
-    /// Creates a tasks file for an intent.
+    /// Reads the plan file associated with an intent file (e.g. .intent/intent-xxx.plan.yaml).
+    /// Use this so tasks/implement can use the user's edited plan when present.
+    /// </summary>
+    public ParseResult<Plan> ReadPlanFile(string intentFilePath)
+    {
+        return _fileService.ReadPlan(intentFilePath);
+    }
+
+    /// <summary>
+    /// Creates a tasks file for an intent (YAML format so the user can edit and re-run).
     /// </summary>
     public string CreateTasksFile(string intentFilePath, Intent intent)
     {
-        var tasksContent = CreateTasksYaml(intent);
-        return _fileService.CreateTasksFile(intentFilePath, tasksContent);
+        var breakdown = CreateTasks(intent);
+        var tasksYaml = ToYaml(breakdown);
+        return _fileService.CreateTasksFile(intentFilePath, tasksYaml);
+    }
+
+    /// <summary>
+    /// Reads the tasks file associated with an intent file (e.g. .intent/intent-xxx.tasks.yaml).
+    /// Use this so implement can use the user's edited tasks when present.
+    /// </summary>
+    public ParseResult<TaskBreakdown> ReadTasksFile(string intentFilePath)
+    {
+        return _fileService.ReadTasks(intentFilePath);
     }
 
     /// <summary>
