@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    
+    <!-- NuGet Package Metadata -->
+    <PackageId>IntentDK</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Intent-driven-development-kit Contributors</Authors>
+    <Company>IntentDK</Company>
+    <Description>Intent-Driven Development Kit - A structured, repeatable, human-readable way to describe development intents. Define goals, scope, constraints, and verification criteria in YAML format for AI agents to generate, execute, and verify code changes.</Description>
+    <PackageTags>intent;development;ai;automation;yaml;planning;verification;cursor;copilot</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/your-org/Intent-driven-development-kit</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/your-org/Intent-driven-development-kit</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    
+    <!-- Package Output -->
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageOutputPath>./nupkg</PackageOutputPath>
+    
+    <!-- Assembly Info -->
+    <AssemblyName>IntentDK.Core</AssemblyName>
+    <RootNamespace>IntentDK.Core</RootNamespace>
+    
+    <!-- Documentation -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
+  </ItemGroup>
+
+</Project>
