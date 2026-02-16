@@ -278,7 +278,10 @@ static class InitCommand
         var rulesDir = Path.Combine(projectPath, tool.RulesPath);
         var rulesFile = Path.Combine(rulesDir, tool.RulesFileName);
 
-        if (File.Exists(rulesFile) && !force)
+        var rulesFileExists = File.Exists(rulesFile);
+        var shouldAppend = tool.Id.Equals("copilot", StringComparison.OrdinalIgnoreCase) && rulesFileExists && !force;
+
+        if (rulesFileExists && !force && !shouldAppend)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"⚠ Skipping {tool.Name}: {tool.RulesFileName} already exists (use --force to overwrite)");
@@ -294,12 +297,21 @@ static class InitCommand
 
         // Write rules content
         var content = RuleTemplates.GetRuleContent(tool);
-        File.WriteAllText(rulesFile, content);
+        if (shouldAppend)
+        {
+            var separator = Environment.NewLine + Environment.NewLine + "---" + Environment.NewLine + Environment.NewLine;
+            File.AppendAllText(rulesFile, separator + content);
+        }
+        else
+        {
+            File.WriteAllText(rulesFile, content);
+        }
 
         Console.ForegroundColor = ConsoleColor.Green;
         Console.Write($"✓ ");
         Console.ResetColor();
-        Console.WriteLine($"Installed {tool.Name} configuration: {Path.Combine(tool.RulesPath, tool.RulesFileName)}");
+        var action = shouldAppend ? "Appended" : "Installed";
+        Console.WriteLine($"{action} {tool.Name} configuration: {Path.Combine(tool.RulesPath, tool.RulesFileName)}");
 
         if (!string.IsNullOrEmpty(tool.SetupInstructions))
         {

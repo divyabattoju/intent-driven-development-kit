@@ -115,12 +115,12 @@ public static class AiToolRegistry
     public static readonly AiToolConfig Claude = new()
     {
         Id = "claude",
-        Name = "Claude (AGENTS.md)",
-        Description = "Claude with AGENTS.md project instructions",
+        Name = "Claude (CLAUDE.md)",
+        Description = "Claude with CLAUDE.md project instructions",
         RulesPath = ".",
-        RulesFileName = "AGENTS.md",
+        RulesFileName = "CLAUDE.md",
         UsesMarkdown = true,
-        SetupInstructions = "Claude will read AGENTS.md for project-specific instructions."
+        SetupInstructions = "Claude will read CLAUDE.md for project-specific instructions."
     };
 
     public static readonly AiToolConfig Generic = new()

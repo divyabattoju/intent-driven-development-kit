@@ -12,12 +12,15 @@ Instead of writing vague prompts, you define structured intents in YAML files:
 ```yaml
 goal: Add logging to user login
 scope:
-  - AuthService
-  - Logger
+  - Add login success/failure logging
+  - Include user ID and outcome in structured log fields
+  - Capture latency for login attempts
 constraints:
-  - Must not expose passwords
+  - Must not expose passwords or raw tokens
+  - Do not log full request bodies
 verification:
-  - Unit test for login logs
+  - Unit test asserts log fields for success and failure
+  - Unit test asserts no sensitive data is logged
 ```
 
 Then use commands to plan, break down tasks, and implement:
@@ -84,9 +87,9 @@ Fill in the details:
 goal: Add JWT-based user authentication
 
 scope:
-  - AuthController
-  - UserService
-  - TokenGenerator
+  - Add login endpoint behavior for JWT issuance
+  - Add token creation and validation logic
+  - Add JWT configuration for expiry and signing
 
 constraints:
   - Use JWT tokens
@@ -133,7 +136,7 @@ verification:
 # Required fields
 goal: <What you want to achieve>
 scope:
-  - <File, class, or module affected>
+  - <High-level changes (what to change, not how)>
 
 # Recommended fields  
 constraints:
@@ -153,7 +156,7 @@ tags:
 | Field | Required | Description |
 |-------|----------|-------------|
 | `goal` | Yes | Clear description of what you want to achieve |
-| `scope` | Yes | Files, classes, or modules to modify |
+| `scope` | Yes | High-level changes (what to change, not how) |
 | `constraints` | No | Rules that must be followed |
 | `verification` | No | Criteria to confirm success |
 | `context` | No | Background information |
@@ -186,10 +189,14 @@ AI reads the intent and generates a structured plan:
 ### Steps
 | Step | Action | Target | Description |
 |------|--------|--------|-------------|
-| 1 | 👀 Review | AuthController | Analyze current auth |
-| 2 | ✏️ Modify | UserService | Add JWT generation |
-| 3 | ✏️ Modify | AuthController | Add login endpoint |
-| 4 | 🧪 Test | AuthTests | Add authentication tests |
+| 1 | 👀 Review | Current auth flow | Review existing auth behavior |
+| 2 | ✏️ Modify | JWT creation | Add JWT creation and validation |
+| 3 | ✏️ Modify | Login behavior | Update login behavior for JWT issuance |
+
+### Changes
+- Add JWT creation and validation logic
+- Update login behavior to issue tokens
+- Add JWT configuration for expiry and signing
 
 ### Constraints to Respect
 - ⚠️ Use JWT tokens
@@ -262,9 +269,9 @@ Verify against original criteria:
 goal: Add pagination to user list API
 
 scope:
-  - UserController
-  - UserRepository
-  - UserService
+  - Add pagination parameters to list endpoint
+  - Add pagination logic to data access
+  - Add paging metadata to response
 
 constraints:
   - Default page size: 20
@@ -283,8 +290,8 @@ verification:
 goal: Fix race condition in order processing
 
 scope:
-  - OrderProcessor
-  - InventoryService
+  - Add concurrency guard to order processing
+  - Add inventory update locking behavior
 
 constraints:
   - Must not affect performance by more than 5%
@@ -305,9 +312,8 @@ tags:
 goal: Extract email logic into dedicated service
 
 scope:
-  - UserService
-  - NotificationService
-  - EmailService (new)
+  - Move email-sending responsibilities into a dedicated service
+  - Update callers to use the new email service
 
 constraints:
   - No changes to external API

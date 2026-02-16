@@ -34,7 +34,7 @@ alwaysApply: true
 
 # Intent-Driven Development Kit (IntentDK)
 
-This rule enables intent-driven development commands. Users define their development goals in structured YAML files, then use commands to plan, break down tasks, and implement.
+This rule enables intent-driven development commands. Users define their development goals in structured YAML files, then use commands to plan, break down tasks, and implement. Keep chat output concise.
 
 ## Commands Overview
 
@@ -49,7 +49,7 @@ This rule enables intent-driven development commands. Users define their develop
 
 ## `/intent` - Create New Intent
 
-When the user types `/intent`, create a new intent YAML file in `.intent/` directory.
+When the user types `/intent`, create a new intent YAML file in `.intent/` directory. Focus on what to change, not how to change it; the plan and tasks will define the how.
 
 **Variants:**
 - `/intent` - Basic template
@@ -68,7 +68,7 @@ When the user types `/intent`, create a new intent YAML file in `.intent/` direc
 goal: <What you want to achieve>
 
 scope:
-  - <File, class, or module to modify>
+  - <Focus on what to change, not how. The plan and tasks will define the how.>
 
 constraints:
   - <Requirements that MUST be respected>
@@ -79,35 +79,41 @@ verification:
 
 ## `/intent.plan` - Generate Plan
 
-Read the most recent intent file and generate a structured implementation plan.
+Read the most recent intent file and generate a structured implementation plan. Keep steps high-level; detailed steps live in `/intent.tasks`.
 
 **Actions:**
 1. Read the latest `.intent/*.intent.yaml` file.
 2. Generate the plan and **write it to the associated plan file** `.intent/<same-base>.plan.yaml` in YAML format so the user can edit and rejig the plan.
-3. Show the plan in chat (markdown) as well.
+3. Show the plan in chat (markdown) as well and very concise.
+4. When referencing files, use relative paths from project root with links.
+5. For each change, list the file path (relative) with link and what to change.
 
 **Plan YAML format** (write this to `.plan.yaml`; the user can edit steps, order, and targets):
 ```yaml
 id: <short-id>
 intent_id: <from intent>
+intent: intentions
+touches:
+  - file: <relative path>
+    reason: <why this file changes>
+  - file: <relative path>
+    reason: <why this file changes>
 summary: <one-line summary>
 steps:
   - step: 1
     action: Review   # or Modify, Create, Delete, Test, Configure, Document
     target: <file or component>
-    description: <what this step does>
-    details: <optional details>
-    expected_outcome: <optional>
+    description: <one-line what to change>
   - step: 2
     action: Modify
     target: <target>
-    description: <description>
+    description: <one-line what to change>
 affected_files: [<list of paths>]
 risks: [<optional risks>]
 dependencies: [<optional dependencies>]
 ```
 
-**Chat response (markdown):**
+**Chat response (markdown, concise):**
 ```markdown
 ## Implementation Plan
 
@@ -234,18 +240,47 @@ Create a new file `.intent/intent-YYYYMMDD-HHMMSS.intent.yaml` with this templat
 ```yaml
 goal: <What to achieve>
 scope:
-  - <Files/classes to modify>
+  - Focus on what to change, not how to change. The plan and tasks will define the how.
 constraints:
   - <Requirements to respect>
 verification:
   - <How to verify success>
 ```
 
+
 ### `/intent.plan` - Generate Plan
-Read the latest `.intent/*.intent.yaml` file and generate:
-1. Implementation steps with actions and targets
-2. Constraints to respect
-3. Verification checklist
+Read the latest `.intent/*.intent.yaml` file and generate a structured implementation plan. Keep steps high-level; detailed steps live in `/intent.tasks`.
+
+Also write the plan to the associated plan file so it can be edited later:
+- Save to `.intent/<same-base>.plan.yaml` (YAML format)
+- Show the plan in chat as markdown and concise
+- Use relative paths with markdown links for files
+- For each change, list the file path (relative) with link and what to change
+
+**Plan YAML format** (write this to `.plan.yaml`; the user can edit steps, order, and targets):
+```yaml
+id: <short-id>
+intent_id: <from intent>
+intent: intentions
+touches:
+  - file: <relative path>
+    reason: <why this file changes>
+  - file: <relative path>
+    reason: <why this file changes>
+summary: <one-line summary>
+steps:
+  - step: 1
+    action: Review   # or Modify, Create, Delete, Test, Configure, Document
+    target: <file or component>
+    description: <one-line what to change>
+  - step: 2
+    action: Modify
+    target: <target>
+    description: <one-line what to change>
+affected_files: [<list of paths>]
+risks: [<optional risks>]
+dependencies: [<optional dependencies>]
+```
 
 ### `/intent.tasks` - Break Down Tasks
 Create detailed tasks with:
@@ -420,7 +455,7 @@ Check criteria and report ✅/❌ for each.
 
     private static string GetClaudeAgentsMd()
     {
-        return @"# AGENTS.md - Intent-Driven Development
+        return @"# CLAUDE.md - Intent-Driven Development
 
 This project uses Intent-Driven Development (IntentDK) for structured code changes.
 
