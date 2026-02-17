@@ -60,7 +60,7 @@ intent init . --tool copilot     # For GitHub Copilot
 intent init . --tool cody        # For Sourcegraph Cody
 intent init . --tool continue    # For Continue
 intent init . --tool windsurf    # For Windsurf
-intent init . --tool claude      # For Claude (AGENTS.md)
+intent init . --tool claude      # For Claude (CLAUDE.md)
 intent init . --all              # For all AI tools
 ```
 
@@ -361,7 +361,7 @@ The init command will:
 | Continue | `.continue/rules.md` | `intent init . -t continue` |
 | Windsurf | `.windsurf/rules/intent-command.md` | `intent init . -t windsurf` |
 | Aider | `.aider.conf.yml` | `intent init . -t aider` |
-| Claude | `AGENTS.md` | `intent init . -t claude` |
+| Claude | `CLAUDE.md` | `intent init . -t claude` |
 
 ### CLI Commands
 
