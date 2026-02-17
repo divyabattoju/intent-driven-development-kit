@@ -52,19 +52,25 @@ This rule enables intent-driven development commands. Users define their develop
 When the user types `/intent`, create a new intent YAML file in `.intent/` directory. Focus on what to change, not how to change it; the plan and tasks will define the how.
 
 **Variants:**
-- `/intent` - Basic template
-- `/intent feature <hint>` - Feature template
-- `/intent bugfix <hint>` - Bug fix template
-- `/intent refactor <hint>` - Refactoring template
-- `/intent security <hint>` - Security enhancement template
+- `/intent` - Basic template (creates `YYYYMMDD-intent-HHMMSS.intent.yaml`)
+- `/intent feature <description>` - Feature template (e.g., `YYYYMMDD-feature-add-user-auth.intent.yaml`)
+- `/intent bugfix <description>` - Bug fix template (e.g., `YYYYMMDD-bugfix-fix-null-pointer.intent.yaml`)
+- `/intent refactor <description>` - Refactoring template (e.g., `YYYYMMDD-refactor-cleanup-services.intent.yaml`)
+- `/intent security <description>` - Security enhancement template (e.g., `YYYYMMDD-security-add-csrf.intent.yaml`)
 
 **Action:**
-1. Create `.intent/intent-YYYYMMDD-HHMMSS.intent.yaml`
-2. Populate with appropriate template
+1. Generate filename: `YYYYMMDD-<type>-<sanitized-description>.intent.yaml` where:
+   - `YYYYMMDD` is today's date (e.g., 20260217)
+   - `<type>` is feature/bugfix/refactor/security/intent
+   - `<sanitized-description>` is the description with spaces replaced by hyphens, lowercase
+2. Create file in `.intent/` directory with appropriate template
 3. Open file for editing
 
 **Template:**
 ```yaml
+id: <8-char unique id>
+created: <ISO timestamp, e.g., 2026-02-17T14:30:22Z>
+
 goal: <What you want to achieve>
 
 scope:
@@ -235,9 +241,20 @@ This repository uses Intent-Driven Development (IntentDK) for structured code ch
 When I use these commands, follow the corresponding workflow:
 
 ### `/intent` - Create New Intent
-Create a new file `.intent/intent-YYYYMMDD-HHMMSS.intent.yaml` with this template:
+Create a new file `.intent/YYYYMMDD-<type>-<description>.intent.yaml` where:
+- YYYYMMDD is today's date (e.g., 20260217)
+- type is feature/bugfix/refactor/security/intent
+- description is from the command, sanitized (lowercase, hyphens for spaces)
 
+Examples:
+- `/intent feature add user auth` → `20260217-feature-add-user-auth.intent.yaml`
+- `/intent bugfix fix null pointer` → `20260217-bugfix-fix-null-pointer.intent.yaml`
+
+Template:
 ```yaml
+id: <8-char unique id>
+created: <ISO timestamp, e.g., 2026-02-17T14:30:22Z>
+
 goal: <What to achieve>
 scope:
   - Focus on what to change, not how to change. The plan and tasks will define the how.
@@ -304,6 +321,9 @@ Check each verification criterion and report:
 ## Intent Format
 
 ```yaml
+id: <8-char unique id>
+created: <ISO timestamp>
+
 goal: Clear description of what to achieve
 scope:
   - List of files, classes, or modules to modify
@@ -333,7 +353,7 @@ priority: low | medium | high | critical
     {
       ""name"": ""Intent-Driven Development"",
       ""description"": ""Commands for structured development workflows"",
-      ""content"": ""When the user types /intent commands, follow these workflows:\n\n/intent - Create .intent/intent-YYYYMMDD-HHMMSS.intent.yaml with template\n/intent.plan - Generate implementation plan from intent file\n/intent.tasks - Break down into detailed tasks\n/intent.implement - Implement tasks step by step\n/intent.verify - Verify against criteria\n\nIntent format:\ngoal: What to achieve\nscope: Files to modify\nconstraints: Rules to follow\nverification: How to verify success""
+      ""content"": ""When the user types /intent commands, follow these workflows:\n\n/intent feature <desc> - Create .intent/YYYYMMDD-feature-<desc>.intent.yaml\n/intent.plan - Generate implementation plan from intent file\n/intent.tasks - Break down into detailed tasks\n/intent.implement - Implement tasks step by step\n/intent.verify - Verify against criteria\n\nIntent format includes id, created timestamp, goal, scope, constraints, verification""
     }
   ],
   ""context"": {
@@ -350,10 +370,13 @@ priority: low | medium | high | critical
 ## Commands
 
 ### /intent
-Create a new intent file at `.intent/intent-YYYYMMDD-HHMMSS.intent.yaml`
+Create a new intent file at `.intent/YYYYMMDD-<type>-<description>.intent.yaml` (e.g., `20260217-feature-add-auth.intent.yaml`)
 
 Template:
 ```yaml
+id: <8-char unique id>
+created: <ISO timestamp>
+
 goal: <objective>
 scope:
   - <files to modify>
@@ -420,9 +443,12 @@ conventions: |
 
 ## /intent - Create Intent
 
-Create `.intent/intent-YYYYMMDD-HHMMSS.intent.yaml`:
+Create `.intent/YYYYMMDD-<type>-<description>.intent.yaml` (e.g., `20260217-feature-add-auth.intent.yaml`):
 
 ```yaml
+id: <8-char unique id>
+created: <ISO timestamp>
+
 goal: <What to achieve>
 scope:
   - <Files to modify>
@@ -462,9 +488,12 @@ This project uses Intent-Driven Development (IntentDK) for structured code chang
 ## Intent Commands
 
 ### /intent
-Create a new intent file: `.intent/intent-YYYYMMDD-HHMMSS.intent.yaml`
+Create a new intent file: `.intent/YYYYMMDD-<type>-<description>.intent.yaml` (e.g., `20260217-feature-add-auth.intent.yaml`)
 
 ```yaml
+id: <8-char unique id>
+created: <ISO timestamp>
+
 goal: What you want to achieve
 scope:
   - Files, classes, or modules to modify
@@ -505,9 +534,9 @@ Verify each criterion with ✅/❌ status.
 
 ```
 .intent/
-├── intent-YYYYMMDD-HHMMSS.intent.yaml  # Intent definition
-├── intent-YYYYMMDD-HHMMSS.plan.yaml    # Generated plan
-└── intent-YYYYMMDD-HHMMSS.tasks.yaml   # Task breakdown
+├── 20260217-feature-add-auth.intent.yaml  # Intent definition
+├── 20260217-feature-add-auth.plan.yaml    # Generated plan
+└── 20260217-feature-add-auth.tasks.yaml   # Task breakdown
 ```
 ";
     }
@@ -524,9 +553,12 @@ Copy these instructions to your AI assistant.
 ## Commands
 
 ### /intent
-Create a new intent file at `.intent/intent-YYYYMMDD-HHMMSS.intent.yaml`:
+Create a new intent file at `.intent/YYYYMMDD-<type>-<description>.intent.yaml` (e.g., `20260217-feature-add-auth.intent.yaml`):
 
 ```yaml
+id: <8-char unique id>
+created: <ISO timestamp>
+
 goal: <What you want to achieve>
 scope:
   - <Files, classes, or modules to modify>

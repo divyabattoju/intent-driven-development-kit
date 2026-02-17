@@ -70,7 +70,7 @@ public class Intent
     /// <summary>
     /// Timestamp when the intent was created.
     /// </summary>
-    [YamlIgnore]
+    [YamlMember(Alias = "created")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     /// <summary>

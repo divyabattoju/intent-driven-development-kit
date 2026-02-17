@@ -13,7 +13,7 @@
     
     <!-- NuGet Package Metadata -->
     <PackageId>IntentDK.Cli</PackageId>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <Authors>Intent-driven-development-kit Contributors</Authors>
     <Description>CLI tool for Intent-Driven Development. Initialize AI coding assistant integrations with 'intent init .' command.</Description>
     <PackageTags>intent;cli;ai;cursor;copilot;development;automation</PackageTags>

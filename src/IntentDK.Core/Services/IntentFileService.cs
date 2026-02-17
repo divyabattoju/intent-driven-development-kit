@@ -50,7 +50,7 @@ public class IntentFileService
         IntentTemplateType template = IntentTemplateType.Basic,
         string? hint = null)
     {
-        var fileName = GenerateFileName(name);
+        var fileName = GenerateFileName(name, template, hint);
         var filePath = Path.Combine(directory, fileName);
         
         var content = template switch
@@ -271,18 +271,63 @@ public class IntentFileService
         return Path.Combine(directory, $"{baseName}{extension}");
     }
 
-    private string GenerateFileName(string? name)
+    private string GenerateFileName(string? name, IntentTemplateType template, string? hint)
     {
+        var datePrefix = DateTime.Now.ToString("yyyyMMdd");
+        
         if (!string.IsNullOrEmpty(name))
         {
             // Sanitize the name
-            var sanitized = string.Join("_", name.Split(Path.GetInvalidFileNameChars()));
-            return $"{sanitized}{IntentFileExtension}";
+            var sanitized = SanitizeFileName(name);
+            return $"{datePrefix}-{sanitized}{IntentFileExtension}";
         }
 
-        // Generate timestamp-based name
-        var timestamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
-        return $"intent-{timestamp}{IntentFileExtension}";
+        // Generate descriptive name based on template type and hint
+        var typePrefix = template switch
+        {
+            IntentTemplateType.Feature => "feature",
+            IntentTemplateType.BugFix => "bugfix",
+            IntentTemplateType.Refactor => "refactor",
+            IntentTemplateType.Security => "security",
+            _ => "intent"
+        };
+
+        string suffix;
+        if (!string.IsNullOrEmpty(hint))
+        {
+            // Use hint to create descriptive suffix
+            suffix = SanitizeFileName(hint);
+        }
+        else
+        {
+            // Fallback to time if no hint provided
+            suffix = DateTime.Now.ToString("HHmmss");
+        }
+
+        return $"{datePrefix}-{typePrefix}-{suffix}{IntentFileExtension}";
+    }
+
+    private string SanitizeFileName(string input)
+    {
+        // Remove invalid characters and replace spaces with hyphens
+        var invalidChars = Path.GetInvalidFileNameChars();
+        var sanitized = string.Join("", input.Split(invalidChars))
+            .Replace(" ", "-")
+            .Replace("_", "-")
+            .ToLowerInvariant();
+        
+        // Remove multiple consecutive hyphens
+        while (sanitized.Contains("--"))
+            sanitized = sanitized.Replace("--", "-");
+        
+        // Trim hyphens from start and end
+        sanitized = sanitized.Trim('-');
+        
+        // Limit length to reasonable file name
+        if (sanitized.Length > 50)
+            sanitized = sanitized.Substring(0, 50).TrimEnd('-');
+        
+        return sanitized;
     }
 }
 

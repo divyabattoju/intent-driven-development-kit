@@ -77,13 +77,15 @@ In your AI chat (Cursor, Copilot, etc.), type:
 /intent feature add user authentication
 ```
 
-This creates `.intent/intent-YYYYMMDD-HHMMSS.intent.yaml` with a template.
+This creates `.intent/20260217-feature-add-user-authentication.intent.yaml` with a template.
 
 ### 4. Edit the Intent
 
 Fill in the details:
 
 ```yaml
+id: a7f3c2e1
+created: 2026-02-17T14:30:22Z
 goal: Add JWT-based user authentication
 
 scope:
@@ -117,11 +119,11 @@ verification:
 
 | Command | Description |
 |---------|-------------|
-| `/intent` | Create a new intent YAML file with template |
-| `/intent feature <hint>` | Create feature intent template |
-| `/intent bugfix <hint>` | Create bug fix intent template |
-| `/intent refactor <hint>` | Create refactoring intent template |
-| `/intent security <hint>` | Create security enhancement template |
+| `/intent` | Create a new intent YAML file with timestamp |
+| `/intent feature <description>` | Create feature intent (e.g., `.intent/20260217-feature-add-login.intent.yaml`) |
+| `/intent bugfix <description>` | Create bug fix intent (e.g., `.intent/20260217-bugfix-fix-null-pointer.intent.yaml`) |
+| `/intent refactor <description>` | Create refactoring intent (e.g., `.intent/20260217-refactor-cleanup-services.intent.yaml`) |
+| `/intent security <description>` | Create security enhancement (e.g., `.intent/20260217-security-add-csrf-protection.intent.yaml`) |
 | `/intent.plan` | Generate implementation plan from intent |
 | `/intent.tasks` | Break down intent into detailed tasks |
 | `/intent.implement` | Implement tasks step by step |
@@ -133,6 +135,10 @@ verification:
 ## Intent Format
 
 ```yaml
+# Auto-generated metadata
+id: a7f3c2e1  # Unique identifier (auto-generated)
+created: 2026-02-17T14:30:22Z  # Creation timestamp (auto-generated)
+
 # Required fields
 goal: <What you want to achieve>
 scope:
@@ -155,6 +161,8 @@ tags:
 
 | Field | Required | Description |
 |-------|----------|-------------|
+| `id` | Auto | Unique identifier (auto-generated) |
+| `created` | Auto | Creation timestamp (auto-generated) |
 | `goal` | Yes | Clear description of what you want to achieve |
 | `scope` | Yes | High-level changes (what to change, not how) |
 | `constraints` | No | Rules that must be followed |
@@ -174,7 +182,7 @@ Creates a YAML file in `.intent/` directory:
 ```
 project/
 └── .intent/
-    └── intent-20260213-143022.intent.yaml
+    └── 20260217-feature-add-user-auth.intent.yaml
 ```
 
 ### 2. Generate Plan (`/intent.plan`)
@@ -266,6 +274,9 @@ Verify against original criteria:
 ### Feature: Add Pagination
 
 ```yaml
+id: b8e4f2a9
+created: 2026-02-15T10:23:45Z
+
 goal: Add pagination to user list API
 
 scope:
@@ -287,6 +298,9 @@ verification:
 ### Bug Fix: Race Condition
 
 ```yaml
+id: c3d7a5e1
+created: 2026-02-16T09:14:33Z
+
 goal: Fix race condition in order processing
 
 scope:
@@ -309,6 +323,9 @@ tags:
 ### Refactoring
 
 ```yaml
+id: d9f2b6c4
+created: 2026-02-16T15:42:18Z
+
 goal: Extract email logic into dedicated service
 
 scope:
@@ -519,13 +536,35 @@ When using IntentDK, files are organized in the `.intent/` directory:
 ```
 project/
 ├── .intent/
-│   ├── intent-20260213-143022.intent.yaml  # Intent definition
-│   ├── intent-20260213-143022.plan.yaml    # Generated plan
-│   └── intent-20260213-143022.tasks.yaml   # Task breakdown
+│   ├── 20260217-feature-add-user-auth.intent.yaml  # Intent definition
+│   ├── 20260217-feature-add-user-auth.plan.yaml    # Generated plan
+│   └── 20260217-feature-add-user-auth.tasks.yaml   # Task breakdown
 └── .cursor/
     └── rules/
         └── intent-command.mdc
 ```
+
+---
+
+## FAQ
+
+### Should I check in intent files to version control?
+
+**Yes!** Intent files should be committed alongside your code. Here's why:
+
+**Benefits of checking in intent files:**
+- 📖 **Documentation** - They serve as human-readable documentation of why code was created
+- 🔁 **Reproducibility** - Team members can regenerate or modify code using the same intent
+- 📜 **History** - Track how requirements evolved over time alongside code changes
+- 🤝 **Collaboration** - Others can understand the original goal and refine the intent if needed
+- ✅ **Code Reviews** - Reviewers can verify implementation matches the stated intent
+
+**Think of them like:**
+- Test files (document expected behavior)
+- README files (explain project goals)
+- Configuration files (define system requirements)
+
+**The default `.intent/.gitignore` is commented out**, so files are committed by default. You can uncomment lines to exclude specific file types if needed.
 
 ---
 

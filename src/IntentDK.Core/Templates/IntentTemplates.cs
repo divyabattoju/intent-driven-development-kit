@@ -16,12 +16,17 @@ public static class IntentTemplates
     public static string GetBasicTemplate(string? goalHint = null)
     {
         var goal = goalHint ?? "Describe what you want to achieve";
+        var timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+        var id = Guid.NewGuid().ToString("N")[..8];
         
         return $@"# Intent-Driven Development
 # Edit this file to define your development intent, then run:
 #   /intent.plan     - Generate implementation plan
 #   /intent.tasks    - Break down into tasks
 #   /intent.implement - Implement the tasks
+
+id: {id}
+created: {timestamp}
 
 goal: {goal}
 
@@ -51,9 +56,14 @@ verification:
     public static string GetFeatureTemplate(string? featureName = null)
     {
         var name = featureName ?? "new feature";
+        var timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+        var id = Guid.NewGuid().ToString("N")[..8];
         
         return $@"# Intent: Add New Feature
 # Run /intent.plan to generate implementation plan
+
+id: {id}
+created: {timestamp}
 
 goal: Implement {name}
 
@@ -90,9 +100,14 @@ tags:
     public static string GetBugFixTemplate(string? bugDescription = null)
     {
         var description = bugDescription ?? "the reported issue";
+        var timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+        var id = Guid.NewGuid().ToString("N")[..8];
         
         return $@"# Intent: Bug Fix
 # Run /intent.plan to generate implementation plan
+
+id: {id}
+created: {timestamp}
 
 goal: Fix {description}
 
@@ -130,9 +145,14 @@ tags:
     public static string GetRefactorTemplate(string? refactorGoal = null)
     {
         var goal = refactorGoal ?? "improve code quality";
+        var timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+        var id = Guid.NewGuid().ToString("N")[..8];
         
         return $@"# Intent: Refactoring
 # Run /intent.plan to generate implementation plan
+
+id: {id}
+created: {timestamp}
 
 goal: Refactor to {goal}
 
@@ -171,9 +191,14 @@ tags:
     public static string GetSecurityTemplate(string? securityGoal = null)
     {
         var goal = securityGoal ?? "enhance security";
+        var timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+        var id = Guid.NewGuid().ToString("N")[..8];
         
         return $@"# Intent: Security Enhancement
 # Run /intent.plan to generate implementation plan
+
+id: {id}
+created: {timestamp}
 
 goal: {goal}
 

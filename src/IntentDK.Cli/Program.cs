@@ -115,6 +115,7 @@ For more info: https://github.com/your-org/Intent-driven-development-kit
         string? name = null;
         string? hint = null;
         var path = ".";
+        var hintParts = new List<string>();
 
         for (int i = 0; i < args.Length; i++)
         {
@@ -135,10 +136,24 @@ For more info: https://github.com/your-org/Intent-driven-development-kit
                 if (i + 1 < args.Length)
                     path = args[++i];
             }
-            else if (!arg.StartsWith("-") && type == null)
+            else if (!arg.StartsWith("-"))
             {
-                type = arg;
+                if (type == null)
+                {
+                    type = arg;
+                }
+                else
+                {
+                    // Collect remaining args as hint description
+                    hintParts.Add(arg);
+                }
             }
+        }
+
+        // If hint wasn't explicitly set via --hint flag, use the collected parts
+        if (hint == null && hintParts.Count > 0)
+        {
+            hint = string.Join(" ", hintParts);
         }
 
         return NewCommand.Execute(type, name, hint, path);
