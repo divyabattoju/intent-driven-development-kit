@@ -13,7 +13,7 @@
     
     <!-- NuGet Package Metadata -->
     <PackageId>IntentDK.Cli</PackageId>
-    <Version>1.0.3</Version>
+    <Version>1.0.5</Version>
     <Authors>Intent-driven-development-kit Contributors</Authors>
     <Description>CLI tool for Intent-Driven Development. Initialize AI coding assistant integrations with 'intent init .' command.</Description>
     <PackageTags>intent;cli;ai;cursor;copilot;development;automation</PackageTags>
@@ -21,10 +21,14 @@
     <PackageProjectUrl>https://github.com/divyabattoju/intent-driven-development-kit</PackageProjectUrl>
     <RepositoryUrl>https://github.com/divyabattoju/intent-driven-development-kit</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\IntentDK.Core\IntentDK.Core.csproj" />
+  </ItemGroup>
+    <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>

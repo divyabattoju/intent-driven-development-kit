@@ -107,9 +107,9 @@ verification:
 ### 5. Plan & Implement
 
 ```
-/intent.plan      # See the implementation plan
-/intent.tasks     # Get detailed task breakdown
-/intent.implement # Start implementing
+/intent.plan      # Generate plan (saved to .intent/<base>.plan.yaml; edit to rejig)
+/intent.tasks     # Get detailed task breakdown (saved to .intent/<base>.tasks.yaml)
+/intent.implement # Start implementing (uses plan/tasks files when present)
 /intent.verify    # Verify when done
 ```
 
@@ -187,7 +187,12 @@ project/
 
 ### 2. Generate Plan (`/intent.plan`)
 
-AI reads the intent and generates a structured plan:
+The AI reads the latest `.intent/*.intent.yaml` file and generates a structured implementation plan. The plan is:
+
+1. **Written to a YAML file** — `.intent/<same-base>.plan.yaml` (e.g. `.intent/20260217-feature-add-user-auth.plan.yaml`) so you can edit and rejig the plan (reorder steps, change targets, add or remove steps). Later commands (`/intent.tasks`, `/intent.implement`) use this file when present.
+2. **Shown in chat** — A markdown summary is also displayed in the chat for quick review.
+
+Example of what you see in chat:
 
 ```markdown
 ## Implementation Plan
@@ -201,15 +206,12 @@ AI reads the intent and generates a structured plan:
 | 2 | ✏️ Modify | JWT creation | Add JWT creation and validation |
 | 3 | ✏️ Modify | Login behavior | Update login behavior for JWT issuance |
 
-### Changes
-- Add JWT creation and validation logic
-- Update login behavior to issue tokens
-- Add JWT configuration for expiry and signing
-
 ### Constraints to Respect
 - ⚠️ Use JWT tokens
 - ⚠️ Tokens expire in 24 hours
 ```
+
+Plan saved to `.intent/<base>.plan.yaml` — edit that file to rejig the plan, then use `/intent.tasks` or `/intent.implement`.
 
 ### 3. Break Down Tasks (`/intent.tasks`)
 

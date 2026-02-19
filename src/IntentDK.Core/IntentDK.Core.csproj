@@ -7,14 +7,14 @@
     
     <!-- NuGet Package Metadata -->
     <PackageId>IntentDK</PackageId>
-    <Version>1.0.3</Version>
+    <Version>1.0.5</Version>
     <Authors>Intent-driven-development-kit Contributors</Authors>
     <Company>IntentDK</Company>
     <Description>Intent-Driven Development Kit - A structured, repeatable, human-readable way to describe development intents. Define goals, scope, constraints, and verification criteria in YAML format for AI agents to generate, execute, and verify code changes.</Description>
     <PackageTags>intent;development;ai;automation;yaml;planning;verification;cursor;copilot</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/your-org/Intent-driven-development-kit</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/your-org/Intent-driven-development-kit</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/divyabattoju/intent-driven-development-kit</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/divyabattoju/intent-driven-development-kit</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     

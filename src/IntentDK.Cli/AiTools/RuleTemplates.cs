@@ -27,12 +27,28 @@ public static class RuleTemplates
     private static string GetCursorRules()
     {
         return @"---
-description: Intent-Driven Development Kit - /intent commands for structured development workflows
+description: Intent-Driven Development Kit - /intent commands. TRIGGER: any user message that starts with /intent (e.g. /intent feature add login, /intent feature add some long thing with something).
 globs: 
 alwaysApply: true
 ---
 
 # Intent-Driven Development Kit (IntentDK)
+
+## TRIGGER — When to run this workflow
+
+If the user's message **starts with** `/intent` (with or without more text after it), this is an **intent command**. You MUST run the intent workflow below. Do not treat it as a general question.
+
+Examples that MUST trigger this rule:
+- `/intent`
+- `/intent feature add user login`
+- `/intent feature add some long with some long thing with something`
+- `/intent bugfix fix null pointer in checkout`
+- `/intent refactor extract payment service`
+- Any message whose first word is `/intent` — the rest is the hint/description (even if long).
+
+If you see `/intent` at the start of the message, create the intent file as described below. Do not ask ""what do you mean"" or answer generally — execute the command.
+
+---
 
 This rule enables intent-driven development commands. Users define their development goals in structured YAML files, then use commands to plan, break down tasks, and implement. Keep chat output concise.
 
@@ -49,11 +65,16 @@ This rule enables intent-driven development commands. Users define their develop
 
 ## `/intent` - Create New Intent
 
-When the user types `/intent`, create a new intent YAML file in `.intent/` directory. Focus on what to change, not how to change it; the plan and tasks will define the how.
+When the user types `/intent` (or `/intent feature ...`, etc.), create a new intent YAML file in `.intent/` directory. Focus on what to change, not how to change it; the plan and tasks will define the how.
+
+**Parsing the user message:** Take everything after the type word as the description/hint. Examples:
+- `/intent feature add some long with some long thing with something` → type=feature, hint=add some long with some long thing with something
+- `/intent bugfix fix crash on save` → type=bugfix, hint=fix crash on save
+The description can be long; use it as the goal hint and in the filename (sanitized).
 
 **Variants:**
 - `/intent` - Basic template (creates `YYYYMMDD-intent-HHMMSS.intent.yaml`)
-- `/intent feature <description>` - Feature template (e.g., `YYYYMMDD-feature-add-user-auth.intent.yaml`)
+- `/intent feature <description>` - Feature template (e.g., `YYYYMMDD-feature-add-user-auth.intent.yaml`). Description can be multiple words.
 - `/intent bugfix <description>` - Bug fix template (e.g., `YYYYMMDD-bugfix-fix-null-pointer.intent.yaml`)
 - `/intent refactor <description>` - Refactoring template (e.g., `YYYYMMDD-refactor-cleanup-services.intent.yaml`)
 - `/intent security <description>` - Security enhancement template (e.g., `YYYYMMDD-security-add-csrf.intent.yaml`)
@@ -65,6 +86,7 @@ When the user types `/intent`, create a new intent YAML file in `.intent/` direc
    - `<sanitized-description>` is the description with spaces replaced by hyphens, lowercase
 2. Create file in `.intent/` directory with appropriate template
 3. Open file for editing
+4. **STOP HERE** - Do NOT proceed to planning or implementation. Wait for the user to review and edit the intent file.
 
 **Template:**
 ```yaml
@@ -87,12 +109,18 @@ verification:
 
 Read the most recent intent file and generate a structured implementation plan. Keep steps high-level; detailed steps live in `/intent.tasks`.
 
+**Adaptive Behavior:**
+- If the intent file has been updated since the last plan, **regenerate the plan** to reflect the new intent
+- If you detect manual code changes that don't match the existing plan, **update the plan** to reflect the current state
+- Always check if a `.plan.yaml` already exists - if it does and the intent hasn't changed, ask the user if they want to regenerate it
+
 **Actions:**
 1. Read the latest `.intent/*.intent.yaml` file.
 2. Generate the plan and **write it to the associated plan file** `.intent/<same-base>.plan.yaml` in YAML format so the user can edit and rejig the plan.
 3. Show the plan in chat (markdown) as well and very concise.
 4. When referencing files, use relative paths from project root with links.
 5. For each change, list the file path (relative) with link and what to change.
+6. **STOP HERE** - Do NOT proceed to implementation. Wait for the user to review the plan and explicitly request `/intent.tasks` or `/intent.implement`.
 
 **Plan YAML format** (write this to `.plan.yaml`; the user can edit steps, order, and targets):
 ```yaml
@@ -145,10 +173,16 @@ Plan saved to `.intent/<base>.plan.yaml` — edit that file to rejig the plan, t
 
 Generate detailed task breakdown with dependencies and acceptance criteria. **If a `.plan.yaml` file exists for the intent**, use its steps as the basis for the task breakdown so the user's plan edits are respected.
 
+**Adaptive Behavior:**
+- If the intent or plan has been updated, **regenerate tasks** to reflect the changes
+- If manual code changes detected, **update tasks** to reflect current progress and remaining work
+- If tasks already exist and nothing changed, ask user if they want to regenerate
+
 **Actions:**
 1. Read the latest `.intent/*.intent.yaml` (and optionally `.intent/*.plan.yaml` if present).
 2. Generate the task breakdown and **write it to the associated tasks file** `.intent/<same-base>.tasks.yaml` in YAML format so the user can edit and rejig tasks.
 3. Show the breakdown in chat (markdown) as well.
+4. **STOP HERE** - Do NOT proceed to implementation. Wait for the user to review the tasks and explicitly request `/intent.implement`.
 
 **Tasks YAML format** (write this to `.tasks.yaml`; the user can edit order, add/remove tasks, change criteria):
 ```yaml
@@ -194,7 +228,14 @@ Tasks saved to `.intent/<base>.tasks.yaml` — edit that file to rejig tasks, th
 
 ## `/intent.implement` - Implement
 
+**IMPORTANT:** Only run this command when the user explicitly requests it. Do NOT auto-implement after creating intent, plan, or tasks.
+
 Implement tasks one by one, showing progress. **If a `.plan.yaml` file exists**, follow its steps in order. **If a `.tasks.yaml` file exists**, use its tasks (in order and by dependency) as the list to implement so the user's edits (reorder, add, remove, change criteria) are respected.
+
+**Before starting implementation:**
+- Check if any manual code changes were already made
+- If manual changes detected, note what's already done and focus on remaining work
+- Update task status in `.tasks.yaml` to reflect current reality
 
 ```markdown
 ## Implementing Task T1: [Title]
@@ -222,11 +263,14 @@ Check implementation against criteria:
 
 ## Best Practices
 
-1. Show plan before implementing
-2. Wait for confirmation before changes
-3. Respect scope boundaries
-4. Check constraints continuously
-5. Provide evidence in verification
+1. **NEVER auto-proceed** - Each command (`/intent`, `/intent.plan`, `/intent.tasks`, `/intent.implement`) must be explicitly requested by the user
+2. **Stay adaptive** - Regenerate plan/tasks when intent changes; update them when manual code changes are detected
+3. **Keep in sync** - Plan and tasks should always reflect current reality
+4. Show plan/tasks and STOP - Wait for user review and confirmation
+5. Only implement when user explicitly types `/intent.implement`
+6. Respect scope boundaries
+7. Check constraints continuously
+8. Provide evidence in verification
 ";
     }
 
@@ -264,15 +308,23 @@ verification:
   - <How to verify success>
 ```
 
+**After creating the intent file, STOP and wait for the user to review it. Do NOT proceed to planning or implementation automatically.**
 
 ### `/intent.plan` - Generate Plan
 Read the latest `.intent/*.intent.yaml` file and generate a structured implementation plan. Keep steps high-level; detailed steps live in `/intent.tasks`.
+
+**Adaptive Behavior:**
+- If the intent file has been updated since the last plan, **regenerate the plan** to reflect the new intent
+- If you detect manual code changes that don't match the existing plan, **update the plan** to reflect the current state
+- Always check if a `.plan.yaml` already exists - if it does and the intent hasn't changed, ask the user if they want to regenerate it
 
 Also write the plan to the associated plan file so it can be edited later:
 - Save to `.intent/<same-base>.plan.yaml` (YAML format)
 - Show the plan in chat as markdown and concise
 - Use relative paths with markdown links for files
 - For each change, list the file path (relative) with link and what to change
+
+**STOP after showing plan. Wait for user review.**
 
 **Plan YAML format** (write this to `.plan.yaml`; the user can edit steps, order, and targets):
 ```yaml
@@ -305,12 +357,23 @@ Create detailed tasks with:
 - Dependencies between tasks
 - Acceptance criteria for each
 
+**Adaptive Behavior:**
+- If intent or plan changed, regenerate tasks
+- If manual code changes detected, update tasks to reflect progress
+- If tasks exist and nothing changed, ask to regenerate
+
+**After generating tasks, STOP and wait for the user to review. Do NOT auto-implement.**
+
 ### `/intent.implement` - Implement
+**IMPORTANT:** Only run when the user explicitly types `/intent.implement`. Do NOT auto-implement after creating intent, plan, or tasks.
+
 Work through tasks one by one:
-1. Show which task you're implementing
-2. Make the changes
-3. Mark task complete
-4. Move to next task
+1. Check for any manual changes already made
+2. Update task status to reflect current reality
+3. Show which task you're implementing
+4. Make the changes
+5. Mark task complete
+6. Move to next task
 
 ### `/intent.verify` - Verify
 Check each verification criterion and report:
@@ -337,12 +400,19 @@ priority: low | medium | high | critical
 
 ## Workflow
 
-1. `/intent` → Create intent file
-2. Edit the file with details
-3. `/intent.plan` → Review plan
-4. `/intent.tasks` → See task breakdown
-5. `/intent.implement` → Execute tasks
+**IMPORTANT:** Do NOT auto-proceed between steps. Wait for explicit user commands.
+
+1. `/intent` → Create intent file → **STOP, wait for user review**
+2. User edits the file with details
+3. `/intent.plan` → Generate and show plan → **STOP, wait for user review**
+   - If user updates intent and runs `/intent.plan` again, regenerate plan based on new intent
+4. `/intent.tasks` → Generate task breakdown → **STOP, wait for user review**
+   - If plan/intent changed, regenerate tasks to reflect updates
+5. User explicitly types `/intent.implement` → Execute tasks
+   - Before implementing, check for manual changes and update task status
 6. `/intent.verify` → Confirm completion
+
+**Adaptive:** Plan and tasks stay in sync with intent changes and manual code modifications.
 ";
     }
 
@@ -353,7 +423,7 @@ priority: low | medium | high | critical
     {
       ""name"": ""Intent-Driven Development"",
       ""description"": ""Commands for structured development workflows"",
-      ""content"": ""When the user types /intent commands, follow these workflows:\n\n/intent feature <desc> - Create .intent/YYYYMMDD-feature-<desc>.intent.yaml\n/intent.plan - Generate implementation plan from intent file\n/intent.tasks - Break down into detailed tasks\n/intent.implement - Implement tasks step by step\n/intent.verify - Verify against criteria\n\nIntent format includes id, created timestamp, goal, scope, constraints, verification""
+      ""content"": ""When the user types /intent commands, follow these workflows:\n\n/intent feature <desc> - Create .intent/YYYYMMDD-feature-<desc>.intent.yaml then STOP\n/intent.plan - Generate implementation plan from intent file then STOP, wait for review\n/intent.tasks - Break down into detailed tasks then STOP, wait for review\n/intent.implement - ONLY run when user explicitly types this. Implement tasks step by step\n/intent.verify - Verify against criteria\n\nIMPORTANT: Do NOT auto-proceed between steps. Each step requires explicit user command.\n\nIntent format includes id, created timestamp, goal, scope, constraints, verification""
     }
   ],
   ""context"": {
@@ -386,20 +456,42 @@ verification:
   - <success criteria>
 ```
 
+**STOP after creating the file. Wait for user review.**
+
 ### /intent.plan
-Generate implementation plan from the latest intent file.
+Generate implementation plan from the latest intent file. **STOP after showing the plan. Wait for user to review.**
+
+**Adaptive Behavior:**
+- If intent was updated, regenerate the plan based on new intent
+- If manual code changes detected that don't match plan, update plan to reflect reality
+- If plan exists and intent unchanged, ask user if they want to regenerate
 
 ### /intent.tasks
-Break down intent into detailed tasks with dependencies.
+Break down intent into detailed tasks with dependencies. **STOP after showing tasks. Wait for user review.**
+
+**Adaptive Behavior:**
+- If intent/plan changed, regenerate tasks
+- If manual changes detected, update tasks to reflect progress
+- If tasks exist and nothing changed, ask to regenerate
 
 ### /intent.implement
-Implement tasks one by one, showing progress.
+**ONLY run when user explicitly types this command.** Do NOT auto-implement.
+
+Before implementing:
+1. Check for manual changes already made
+2. Update task status to reflect reality
+
+Then implement tasks one by one, showing progress.
 
 ### /intent.verify
 Verify implementation against criteria.
 
 ## Workflow
-1. Create intent → 2. Plan → 3. Tasks → 4. Implement → 5. Verify
+1. Create intent → **STOP** → 2. Plan → **STOP** → 3. Tasks → **STOP** → 4. User types `/intent.implement` → Implement → 5. Verify
+
+**IMPORTANT:** Do NOT auto-proceed between steps. Each step requires explicit user command.
+
+**Adaptive:** If user updates intent and reruns `/intent.plan`, regenerate plan. If manual code changes detected, update plan/tasks.
 ";
     }
 
@@ -458,6 +550,8 @@ verification:
   - <Success criteria>
 ```
 
+**STOP after creating. Wait for user review.**
+
 ## /intent.plan - Generate Plan
 
 Read intent and output:
@@ -465,11 +559,32 @@ Read intent and output:
 - Constraints to respect
 - Verification checklist
 
+**Adaptive Behavior:**
+- If intent changed, regenerate plan
+- If manual code changes detected, update plan
+- If plan exists and intent unchanged, ask to regenerate
+
+**STOP after showing plan. Wait for user review.**
+
 ## /intent.tasks - Task Breakdown
 
 Generate tasks with ID, type, title, dependencies, acceptance criteria. Write the breakdown to `.intent/<same-base>.tasks.yaml` so the user can rejig tasks.
 
+**Adaptive Behavior:**
+- If intent/plan changed, regenerate tasks
+- If manual changes detected, update tasks and progress
+- If tasks exist and nothing changed, ask to regenerate
+
+**STOP after showing tasks. Wait for user review.**
+
 ## /intent.implement - Execute
+
+**ONLY run when user explicitly types `/intent.implement`.** Do NOT auto-implement.
+
+Before starting:
+1. Check for any manual code changes already made
+2. Update task status to reflect current reality
+3. Focus on remaining work
 
 For each task: show task, make changes, mark complete, next. If `.tasks.yaml` exists, use its tasks (order and dependency) as the list to implement.
 
@@ -503,11 +618,20 @@ verification:
   - How to verify success
 ```
 
+**STOP after creating. Wait for user review.**
+
 ### /intent.plan
 Generate an implementation plan:
 - Steps with actions and targets
 - Constraints to respect
 - Verification checklist
+
+**Adaptive Behavior:**
+- If intent changed, regenerate plan based on updated intent
+- If manual code changes detected, update plan to reflect current state
+- If plan exists and intent unchanged, ask user if they want to regenerate
+
+**STOP after showing plan. Wait for user review.**
 
 ### /intent.tasks
 Break down into detailed tasks:
@@ -515,7 +639,21 @@ Break down into detailed tasks:
 - Dependencies
 - Acceptance criteria
 
+**Adaptive Behavior:**
+- If intent/plan changed, regenerate tasks based on updates
+- If manual code changes detected, update tasks to reflect current state
+- If tasks exist and nothing changed, ask user if they want to regenerate
+
+**STOP after showing tasks. Wait for user review.**
+
 ### /intent.implement
+**ONLY run when user explicitly types this command.** Do NOT auto-implement.
+
+Before implementing:
+1. Check for manual changes already made
+2. Update task status to reflect current state
+3. Focus on remaining work
+
 Implement tasks one by one, showing progress.
 
 ### /intent.verify
@@ -523,12 +661,19 @@ Verify each criterion with ✅/❌ status.
 
 ## Workflow
 
-1. Create intent with `/intent`
+**IMPORTANT:** Do NOT auto-proceed between steps. Each step requires explicit user command.
+
+1. Create intent with `/intent` → **STOP**
 2. Edit the YAML file with details
-3. Generate plan with `/intent.plan`
-4. See tasks with `/intent.tasks`
-5. Implement with `/intent.implement`
+3. Generate plan with `/intent.plan` → **STOP**
+   - Rerun `/intent.plan` after editing intent to regenerate plan
+4. See tasks with `/intent.tasks` → **STOP**
+   - Tasks regenerate if plan/intent changed
+5. User explicitly types `/intent.implement` → Implement
+   - Checks for manual changes before implementing
 6. Verify with `/intent.verify`
+
+**Adaptive:** Plan/tasks update when intent changes or manual code changes detected.
 
 ## File Structure
 
@@ -568,16 +713,39 @@ verification:
   - <How to verify success>
 ```
 
+**STOP after creating the intent file. Wait for user review.**
+
 ### /intent.plan
 Generate an implementation plan from the intent file with:
 - Implementation steps
 - Constraints to respect
 - Verification checklist
 
+**Adaptive Behavior:**
+- If intent changed, regenerate plan based on updated intent
+- If manual code changes detected that don't match plan, update plan to reflect reality
+- If plan exists and intent unchanged, ask user if they want to regenerate
+
+**STOP after showing plan. Wait for user review.**
+
 ### /intent.tasks
 Break down the intent into detailed tasks (ID, type, title, dependencies, acceptance criteria). Write to `.intent/<same-base>.tasks.yaml` so the user can rejig tasks.
 
+**Adaptive Behavior:**
+- If intent/plan changed, regenerate tasks
+- If manual code changes detected, update tasks to reflect current progress
+- If tasks exist and nothing changed, ask to regenerate
+
+**STOP after showing tasks. Wait for user review.**
+
 ### /intent.implement
+**ONLY run when user explicitly types this command.** Do NOT auto-implement after /intent, /intent.plan, or /intent.tasks.
+
+Before implementing:
+1. Check for manual changes already made
+2. Update task status to reflect current state
+3. Focus on remaining work
+
 Implement tasks one by one. If `.tasks.yaml` exists, use its tasks as the list to implement; otherwise follow the plan or intent.
 
 ### /intent.verify
@@ -588,17 +756,23 @@ Verify implementation against criteria:
 ## Workflow
 
 ```
-/intent → Create intent file
+/intent → Create intent file → STOP
    ↓
 Edit YAML with details
    ↓
-/intent.plan → Review plan
+/intent.plan → Review plan → STOP
+   ↓ (Rerun if intent changed to regenerate plan)
+Edit plan if needed
    ↓
-/intent.tasks → See tasks
+/intent.tasks → See tasks → STOP
+   ↓ (Tasks regenerate if plan/intent changed)
+Edit tasks if needed
    ↓
-/intent.implement → Execute
+/intent.implement → Execute (checks for manual changes first)
    ↓
 /intent.verify → Confirm
+
+**Adaptive:** Plan/tasks regenerate when intent changes. Manual code changes trigger plan/task updates.
 ```
 ";
     }
